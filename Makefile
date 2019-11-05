@@ -1,4 +1,4 @@
-SHELL	=	/bin/sh
+SHELL	?=	/bin/sh
 
 NAME	=	barnes_hut
 
@@ -7,7 +7,8 @@ CC		?=	gcc
 RM		?= 	rm -f
 
 SRC 	= 	src/main.c							\
-			src/simulation/simulation.c
+			src/simulation/simulation.c			\
+			src/simulation/octree.c
 
 CFLAGS	=	-iquote./src/include/ -Wall -Wextra -O2
 
@@ -26,4 +27,7 @@ fclean: clean
 
 re: fclean all
 
-.phony: all clean fclean re
+coffee:
+	@echo -ne "    (  )   (   )  )\n     ) (   )  (  (\n     ( )  (    ) )\n     _____________\n    <_____________> ___\n    |             |/ _ \\ \n    |               | | |\n    |               |_| |\n ___|             |\___/\n/    \___________/    \\ \n\_____________________/\n"
+
+.phony: all clean fclean re coffee

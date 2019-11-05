@@ -41,6 +41,9 @@ typedef struct oct_node_s {
     struct oct_node_s *parent;      // parent
 } oct_node_t;
 
+oct_node_t *create_octree(bodies_t *bodies, int nb_bodies);
+void clean_tree(oct_node_t *tree);
+
 static const int X = 0;              // coordinates in min/max arrays   
 static const int Y = 1;              // coordinates in min/max arrays   
 static const int Z = 2;              // coordinates in min/max arrays   
