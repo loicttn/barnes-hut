@@ -97,9 +97,10 @@ void run_simulation(int n)
     bodies_t *bodies = init_bodies(n);
     oct_node_t *octree;
 
-    for (int i = 0; i < 1; i += 1) {
-        octree = create_octree(bodies, n);
+    for (int i = 0; i < 10; i += 1) {
+        octree = create_octree(bodies);
         log(octree, 0);
+        calculate_nodes_gravity_center(octree);
         // run_forces(octree, bodies);
         // display(bodies);
         // display_debug(octree);

@@ -12,12 +12,14 @@ SRC 	= 	src/main.c							\
 
 CFLAGS	=	-iquote./src/include/ -Wall -Wextra -O2
 
+LDFLAGS = -lm
+
 OBJ	=	$(SRC:.c=.o)
 
 all:	$(NAME)
 
 $(NAME):	$(OBJ)
-	$(CC) -o $(NAME) $(OBJ)
+	$(CC) -o $(NAME) $(OBJ) $(LDFLAGS)
 
 clean:
 	$(RM) $(OBJ)

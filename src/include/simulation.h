@@ -4,6 +4,7 @@
 
 static const int GALAXY_SIZE = 2000;
 
+
 void run_simulation(int n);
 
 /*
@@ -36,13 +37,19 @@ typedef struct oct_node_s {
     body_t *body;                   // each node corresponds to a body
     float min[3];                   // min position of the interval
     float max[3];                   // max position of the interval
-    float node_weight;              // set if node is parent
-    struct oct_node_s *child[8];   // children
+    float position[3];              // if child => copy of body position
+                                    // if parent => average position of children
+    float weight;                   // if child => copy of body weight
+                                    // if parent => average weight of children
+    struct oct_node_s *child[8];    // children
     struct oct_node_s *parent;      // parent
 } oct_node_t;
 
-oct_node_t *create_octree(bodies_t *bodies, int nb_bodies);
+
+oct_node_t *create_octree(bodies_t *bodies);
 void clean_tree(oct_node_t *tree);
+void calculate_nodes_gravity_center(oct_node_t *tree);
+
 
 static const int X = 0;              // coordinates in min/max arrays   
 static const int Y = 1;              // coordinates in min/max arrays   
@@ -56,3 +63,7 @@ static const int TSW = 4;            // Top South West
 static const int TSE = 5;            // Top South East   
 static const int TNW = 6;            // Top North West   
 static const int TNE = 7;            // Top North East
+
+static const float THETA = 1.0;
+
+// static const float GRAVITATIONAL_CONST = 6.67428 * 10^-11
