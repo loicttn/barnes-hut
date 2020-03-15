@@ -4,14 +4,15 @@
 #include <stdbool.h>
 #include <math.h>
 
+
 /* FUNCTION: body_in_range
  * --------------------------------
  * checks if the given body is in the 3D range min -> max
- * 
+ *
  * body: body to check if in range
  * min: minimum of the 3D interval
  * max: maximum of the 3D interval
- * 
+ *
  * returns: true if body is in range
  */
 static bool body_in_range(body_t *body, float min_x, float max_x,
@@ -23,14 +24,13 @@ static bool body_in_range(body_t *body, float min_x, float max_x,
     res = body->x >= min_x && body->x <= max_x;
     res = res && body->y >= min_y && body->y <= max_y;
     res = res && body->z >= min_z && body->z <= max_z;
-
     return res;
 }
 
 /* FUNCTION: get_body_interval
  * --------------------------------
  * gets the position of the body in the current 3D-cube
- * 
+ *
  * the position returned is the 3D sub-cube index in which the body is
  *      * BSW : Bottom-South-West
  *      * BSE : Bottom-South-East
@@ -44,7 +44,7 @@ static bool body_in_range(body_t *body, float min_x, float max_x,
  * body: body to check if in range
  * min: minimum of the 3D interval
  * max: maximum of the 3D interval
- * 
+ *
  * returns: the position of the body in the current 3D-cube
  */
 static int get_body_interval(body_t *body, float min[3], float max[3])
@@ -88,12 +88,12 @@ static int get_body_interval(body_t *body, float min[3], float max[3])
 /* FUNCTION: move_to_parent_node
  * --------------------------------------
  * creates a parent node in tree->child[position] and
- * copies the initial content (type CHILD) to one of 
+ * copies the initial content (type CHILD) to one of
  * the new parent children in the good sub-cube
- * 
+ *
  * tree: parent node where tree->child[position] will
  * be moved to parent-type node
- * 
+ *
  * position: position of the child to transform to parent node
  */
 static void move_to_parent_node(oct_node_t *tree, int position)
@@ -173,14 +173,13 @@ static void move_to_parent_node(oct_node_t *tree, int position)
     new_pos = get_body_interval(save->body,
                                 tree->child[position]->min,
                                 tree->child[position]->max);
-    tree->child[position]->child[new_pos] = save; 
-    tree->child[position]->child[new_pos]->parent = tree->child[position];
+    tree->child[position]->child[new_pos] = save;
 }
 
 /* FUNCTION: insert_node
  * --------------------------------------
  * insert a body in the octree recursively
- * 
+ *
  * tree: root of the octree (the root must have a type PARENT)
  * body: body to insert in the octree
  */
@@ -190,13 +189,12 @@ static void insert_node(oct_node_t *tree, body_t *body)
 
     if (tree->child[position]) {
         if (tree->child[position]->type == CHILD)
-            move_to_parent_node(tree, position); 
+            move_to_parent_node(tree, position);
         insert_node(tree->child[position], body);
     } else {
         tree->child[position] = (oct_node_t *)calloc(sizeof(oct_node_t), 1);
         tree->child[position]->body = body;
         tree->child[position]->type = CHILD;
-        tree->child[position]->parent = tree;
         // copy data to current node so that when we will calculate the forces
         // they will be calculated based on the position of bodies before
         // the force are applied on bodies
@@ -210,7 +208,7 @@ static void insert_node(oct_node_t *tree, body_t *body)
 /* FUNCTION: clean_tree
  * --------------------------------------
  * cleans an octree recursively
- * 
+ *
  * tree: root of the octree (the root must have a type PARENT)
  */
 void clean_tree(oct_node_t *tree)
@@ -230,7 +228,7 @@ void clean_tree(oct_node_t *tree)
  * initiates the octree in which all the calculus are going to be made
  *
  * bodies: list of all the bodies in the universe
- * 
+ *
  * returns: the pointer of the octree root
  */
 oct_node_t *create_octree(bodies_t *bodies)
@@ -255,13 +253,13 @@ oct_node_t *create_octree(bodies_t *bodies)
  * --------------------------------------
  *
  * calculates the gravity cented of each parent node of the octree
- * 
+ *
  * sets node->weight as the sum of all children masses
  * sets node->postion as the weighted average of the 3D position (weighted
  * with the weight of each child body)
- * 
+ *
  * tree: parent node of an octree
- * 
+ *
  */
 void calculate_nodes_gravity_center(oct_node_t *tree)
 {
@@ -282,13 +280,40 @@ void calculate_nodes_gravity_center(oct_node_t *tree)
     tree->position[Z] /= tree->weight;
 }
 
+static float compute_gravitational_force(float m1, float m2, float r)
+{
+    float grav_const = 6.67428 * pow(10, -11);
+
+    if (r == 0.0)
+        return 0.0;
+    return grav_const * m1 * m2 / (r * r);
+}
+
 static void apply_forces_on_node(oct_node_t *mover, oct_node_t *attractor)
 {
-    
+    // 3D vector representing the gravitational
+    // force between mover and attractor
+    float force[3] = {0.0, 0.0, 0.0};
+    // 3D acceleration vector of mover object
+    float acceleration[3] = {0.0};
+
+    for (int index = 0; index < 3; index += 1) {
+        force[index] = compute_gravitational_force(mover->weight,
+                                                   attractor->weight,
+                                                   attractor->position[index]
+                                                   - mover->position[index]);
+        if (mover->weight == 0)
+            exit(1);
+        acceleration[index] = force[index] / mover->weight;
+        mover->body->velocity[index] += acceleration[index];
+    }
+    mover->body->x += mover->body->velocity[X];
+    mover->body->y += mover->body->velocity[Y];
+    mover->body->z += mover->body->velocity[Z];
 }
 
 /*
- * calculates the quotient s / d, where s is the width of the region
+ * calculates the value of  s / d, where s is the width of the region
  * represented by the internal node, and d is the distance between the body
  * and the node's center of mass.
  */
@@ -296,11 +321,11 @@ static float get_action_ratio(oct_node_t *mover, oct_node_t *attractor)
 {
     // width of the region (as each parent region is a cube, we will get its
     // value from the absolute value of the difference between min[X] and max[X])
-    // if attractor is CHILD type, s = 1.0
+    // if attractor is CHILD, s = 1.0
     float s = 1.0;
     // distance between mover and attractor, 3d distance formula is
     // 	√((x2 - x1)² + (y2 - y1)² + (z2 - z1)²)
-    float d; 
+    float d;
 
     if (attractor->type == PARENT)
         s = fabs(attractor->max[X] - attractor->min[X]);
@@ -321,12 +346,11 @@ static void get_forces_on_node(oct_node_t *node, oct_node_t *parent)
             continue;
         action_ratio = get_action_ratio(node, parent->child[i]);
         if (action_ratio < THETA)
-            apply_forces_on_node(node, node->parent->child[i]);
-        else if (node->parent->child[i]->type == PARENT)
+            apply_forces_on_node(node, parent->child[i]);
+        else if (parent->child[i]->type == PARENT)
             get_forces_on_node(node, parent->child[i]);
     }
 }
-
 
 void run_forces(oct_node_t *tree)
 {

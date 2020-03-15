@@ -1,5 +1,6 @@
 #include <stdlib.h>
 #include <stdbool.h>
+#include <math.h>
 
 #include "simulation.h"
 
@@ -11,7 +12,7 @@
  *
  * n: number of bodies to include (at random position with random mass) in the
  * universe
- * 
+ *
  * returns: a simple linked list of bodies_t containing all the created bodies
  */
 static bodies_t *init_bodies(int n)
@@ -58,7 +59,7 @@ static void clean_bodies(bodies_t *body)
  *
  * bodies: list of bodies to cleanup
  */
-static void log(oct_node_t *tree, int n)
+static void log_tree(oct_node_t *tree, int n)
 {
     for (int i = 0; i < n; i += 1)
         printf("\t");
@@ -73,7 +74,7 @@ static void log(oct_node_t *tree, int n)
         printf("\n");
     for (int i = 0; i < 8; i += 1) {
         if (tree->child[i] && tree->child[i]->type == PARENT) {
-            log(tree->child[i], n + 1);
+            log_tree(tree->child[i], n + 1);
         }
     }
 }
@@ -95,17 +96,13 @@ static void log(oct_node_t *tree, int n)
 void run_simulation(int n)
 {
     bodies_t *bodies = init_bodies(n);
-    oct_node_t *octree;
+    oct_node_t *tree;
 
     for (int i = 0; i < 10; i += 1) {
-        octree = create_octree(bodies);
-        log(octree, 0);
-        calculate_nodes_gravity_center(octree);
-        // run_forces(octree, bodies);
-        // display(bodies);
-        // display_debug(octree);
-        clean_tree(octree);
-        octree = NULL;
+        tree = create_octree(bodies);
+        calculate_nodes_gravity_center(tree);
+        run_forces(oct_node_t *tree);
+        clean_tree(tree);
     }
     clean_bodies(bodies);
     bodies = NULL;

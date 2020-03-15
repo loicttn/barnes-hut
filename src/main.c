@@ -4,6 +4,8 @@
 
 #include "simulation.h"
 
+#include <GL/glut.h>
+
 static void print_help(void)
 {
     printf("USAGE:\n\t./barnes_hut n\n\nPARAMETERS:\n\tn\t"

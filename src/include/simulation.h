@@ -16,6 +16,7 @@ typedef struct body_s {
     float y;                        // 3D position between 0 and GALAXY_SIZE
     float z;                        // 3D position between 0 and GALAXY_SIZE
     float weight;                   // weight of the body in UNIT
+    float velocity[3];              // 3D velocity vector
 } body_t;
 
 typedef struct bodies_s {
@@ -42,13 +43,13 @@ typedef struct oct_node_s {
     float weight;                   // if child => copy of body weight
                                     // if parent => average weight of children
     struct oct_node_s *child[8];    // children
-    struct oct_node_s *parent;      // parent
 } oct_node_t;
 
 
 oct_node_t *create_octree(bodies_t *bodies);
 void clean_tree(oct_node_t *tree);
 void calculate_nodes_gravity_center(oct_node_t *tree);
+void run_forces(oct_node_t *tree);
 
 
 static const int X = 0;              // coordinates in min/max arrays   
@@ -65,5 +66,3 @@ static const int TNW = 6;            // Top North West
 static const int TNE = 7;            // Top North East
 
 static const float THETA = 1.0;
-
-// static const float GRAVITATIONAL_CONST = 6.67428 * 10^-11

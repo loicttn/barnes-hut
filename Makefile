@@ -12,7 +12,7 @@ SRC 	= 	src/main.c							\
 
 CFLAGS	=	-iquote./src/include/ -Wall -Wextra -O2
 
-LDFLAGS = -lm
+LDFLAGS = -lm -lX11 -lglut -lGL -lGLU
 
 OBJ	=	$(SRC:.c=.o)
 
